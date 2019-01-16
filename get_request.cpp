@@ -30,12 +30,12 @@ void addToFile(std::string fname, std::vector<std::string> formattedCases);
 void removeFromFile(std::string fname, std::vector<std::string> cases);
 
 int main(int argc, char **argv) {
-	int (*usage)(int) = [argv](int r){
+	auto usage = [argc, argv](){
 		std::cerr << "Usage: " << argv[0] << " <case-file>" << std::endl;
 		std::cerr << "       " << argv[0] << " -i <case-number> ..." << std::endl;
 		std::cerr << "       " << argv[0] << " -a <case-file> <case-number> ..." << std::endl;
 		std::cerr << "       " << argv[0] << " -r <case-file> <case-number> ..." << std::endl;
-		return r;
+		return argc;
 	};
 	std::string fileName;
 	std::vector<std::string> caseNumbers;
@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
 	
 	//check args
 	if (argc < 2)
-		return usage(1);
+		return usage();
 	std::string arg1 = argv[1];
 	if (argc == 2 && arg1.compare("-i") != 0 && arg1.compare("-a") != 0 && arg1.compare("-r")) { //could also use (arg1.find("-") == 0)
 		which = 1;
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
 		for (int i = 3; i < argc; ++i)
 			caseNumbers.emplace_back(argv[i]);
 	} else {
-		return usage(argc);
+		return usage();
 	}
 
 	curl_global_init(CURL_GLOBAL_ALL);
@@ -77,10 +77,10 @@ int main(int argc, char **argv) {
 		break;
 	case 3:
 		updateFile(fileName);
-		addToFile(getRecent(caseNumbers));
+		addToFile(fileName, getRecent(caseNumbers));
 		break;
 	case 4:
-		removeFromFile(caseNumbers);
+		removeFromFile(fileName, caseNumbers);
 		break;
 	default:
 		std::cerr << "Internal error: execution terminated" << std::endl;
@@ -91,16 +91,25 @@ int main(int argc, char **argv) {
 	
 	return 0;
 }
-1
 
 
-void updateFile(std::string fname) {}
 
-std::vector<std::string> getRecent(std::vector<std::string> cases) { return std::vector<std::string>; }
+void updateFile(std::string fname) {
+	std::cout << "updateFile called" << std::endl;
+}
 
-void addToFile(std::string fname, std::vector<std::string> formattedCases) {}
+std::vector<std::string> getRecent(std::vector<std::string> cases) {
+	std::cout << "getRecent called" << std::endl;
+	return std::vector<std::string>();
+}
 
-void removeFromFile(std::string fname, std::vector<std::string> cases) {}
+void addToFile(std::string fname, std::vector<std::string> formattedCases) {
+	std::cout << "addToFile called" << std::endl;
+}
+
+void removeFromFile(std::string fname, std::vector<std::string> cases) {
+	std::cout << "removeFromFile called" << std::endl;
+}
 
 
 
@@ -113,6 +122,7 @@ void removeFromFile(std::string fname, std::vector<std::string> cases) {}
 std::string readSite(std::string url, int& ok) {
 	CURL * handle;
 	CURLcode code;
+	char * err = new char[CURL_ERROR_SIZE];
 	std::string text = "";
 	handle = curl_easy_init();
 	
